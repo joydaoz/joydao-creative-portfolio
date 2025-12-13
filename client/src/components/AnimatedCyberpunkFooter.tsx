@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Github, Mail, Music, Radio, Tv, ExternalLink, Instagram, Music2 } from "lucide-react";
+import { Music, Radio, Tv, ExternalLink, Instagram, Music2 } from "lucide-react";
 
 interface SocialLink {
   name: string;
@@ -121,7 +121,7 @@ export default function AnimatedCyberpunkFooter() {
                 <span className="font-mono text-xs font-bold uppercase tracking-widest line-clamp-1">
                   {link.name}
                 </span>
-                <div className={`${colorMap[link.color]} p-1.5 transition-all`}>
+                <div className={`${colorMap[link.color as keyof typeof colorMap]} p-1.5 transition-all`}>
                   {link.icon}
                 </div>
               </div>

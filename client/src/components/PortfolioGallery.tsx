@@ -104,13 +104,13 @@ export default function PortfolioGallery() {
             {hoveredId === work.id && (
               <>
                 <div
-                  className={`absolute inset-0 border-2 ${colorMap[work.color]} opacity-50 blur-sm`}
+                  className={`absolute inset-0 border-2 ${colorMap[work.color as keyof typeof colorMap]} opacity-50 blur-sm`}
                   style={{
                     transform: `translate(${glitchOffset.x}px, ${glitchOffset.y}px)`,
                   }}
                 ></div>
                 <div
-                  className={`absolute inset-0 border-2 ${colorMap[work.color]} opacity-30`}
+                  className={`absolute inset-0 border-2 ${colorMap[work.color as keyof typeof colorMap]} opacity-30`}
                   style={{
                     transform: `translate(${-glitchOffset.x * 1.5}px, ${-glitchOffset.y * 1.5}px)`,
                   }}
@@ -123,7 +123,7 @@ export default function PortfolioGallery() {
               href={work.link}
               target="_blank"
               rel="noopener noreferrer"
-              className={`relative block border-2 p-4 transition-all duration-300 overflow-hidden group ${colorMap[work.color]} ${
+              className={`relative block border-2 p-4 transition-all duration-300 overflow-hidden group ${colorMap[work.color as keyof typeof colorMap]} ${
                 hoveredId === work.id ? "shadow-[0_0_20px_rgba(0,255,65,0.3)]" : ""
               }`}
             >
