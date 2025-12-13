@@ -4,6 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { ExternalLink, Terminal, Wifi, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
+import TerminalNewsletter from "@/components/TerminalNewsletter";
 
 export default function Home() {
   const [glitchActive, setGlitchActive] = useState(false);
@@ -249,6 +250,17 @@ export default function Home() {
               </CardContent>
             </Card>
           </div>
+        </section>
+
+        <Separator className="bg-primary/30" />
+
+        {/* Newsletter Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-3 h-3 bg-accent animate-pulse"></div>
+            <h2 className="text-3xl font-bold text-accent">JOIN_THE_NETWORK</h2>
+          </div>
+          <TerminalNewsletter />
         </section>
 
         {/* Footer */}
