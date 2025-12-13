@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { ExternalLink, Terminal, Wifi, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import TerminalNewsletter from "@/components/TerminalNewsletter";
+import PortfolioGallery from "@/components/PortfolioGallery";
 
 export default function Home() {
   const [glitchActive, setGlitchActive] = useState(false);
@@ -251,6 +252,11 @@ export default function Home() {
             </Card>
           </div>
         </section>
+
+        <Separator className="bg-primary/30" />
+
+        {/* Portfolio Section */}
+        <PortfolioGallery />
 
         <Separator className="bg-primary/30" />
 
