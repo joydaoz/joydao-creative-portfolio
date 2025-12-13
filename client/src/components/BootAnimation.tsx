@@ -68,20 +68,22 @@ export default function BootAnimation({ onComplete }: BootAnimationProps) {
 
           {/* Boot Output */}
           <div className="space-y-1 min-h-64 max-h-96 overflow-y-auto">
-            {lines.map((line, i) => (
-              <div
-                key={i}
-                className={`leading-relaxed ${
-                  line.includes("READY") || line.includes("GRANTED")
-                    ? "text-accent font-bold"
-                    : line.includes("ERROR") || line.includes("FAILED")
-                    ? "text-destructive"
-                    : "text-primary"
-                }`}
-              >
-                <span className="text-muted-foreground">{">"}</span> {line}
-              </div>
-            ))}
+            {lines.map((line, i) => {
+              const lineStr = line || "";
+              const isReady = lineStr.includes("READY") || lineStr.includes("GRANTED");
+              const isError = lineStr.includes("ERROR") || lineStr.includes("FAILED");
+              const colorClass = isReady
+                ? "text-accent font-bold"
+                : isError
+                ? "text-destructive"
+                : "text-primary";
+
+              return (
+                <div key={i} className={`leading-relaxed ${colorClass}`}>
+                  <span className="text-muted-foreground">{`>`}</span> {lineStr}
+                </div>
+              );
+            })}
             {isComplete && (
               <div className="mt-4 animate-pulse">
                 <span className="text-primary">_</span>
