@@ -149,6 +149,50 @@ export default function Home() {
 
         <Separator className="bg-primary/30" />
 
+        {/* Events Terminal Section */}
+        <section className="border border-primary bg-black p-1 shadow-[0_0_10px_rgba(0,255,65,0.1)]">
+          <div className="bg-primary text-black px-2 py-1 flex justify-between items-center text-xs font-bold mb-2">
+            <span>TERMINAL_02: LIVE_EXECUTIONS</span>
+            <div className="flex gap-1">
+              <div className="w-2 h-2 bg-black"></div>
+              <div className="w-2 h-2 bg-black"></div>
+            </div>
+          </div>
+          <div className="p-4 font-mono text-sm md:text-base space-y-4 min-h-[300px]">
+            <div className="text-muted-foreground mb-4">
+              {">"} QUERYING DATABASE FOR UPCOMING GIGS...<br/>
+              {">"} 3 RECORDS FOUND.
+            </div>
+            
+            <div className="space-y-2">
+              {[
+                { date: "2025-11-05", loc: "NEO_TOKYO_VR", event: "GLITCH_FEST_25", status: "CONFIRMED" },
+                { date: "2025-12-12", loc: "UNDERGROUND_BUNKER", event: "NOISE_PROTOCOL", status: "SOLD_OUT" },
+                { date: "2026-01-20", loc: "THE_VOID_CLUB", event: "SYSTEM_RESET_PARTY", status: "PENDING" }
+              ].map((gig, i) => (
+                <div key={i} className="grid grid-cols-1 md:grid-cols-[120px_1fr_1fr_100px] gap-2 hover:bg-primary/10 p-1 transition-colors border-b border-primary/10 pb-2 last:border-0">
+                  <span className="text-accent">{gig.date}</span>
+                  <span className="text-primary font-bold">{gig.event}</span>
+                  <span className="text-muted-foreground">@{gig.loc}</span>
+                  <span className={`text-xs px-1 self-start justify-self-start md:justify-self-end ${
+                    gig.status === 'CONFIRMED' ? 'bg-primary text-black' : 
+                    gig.status === 'SOLD_OUT' ? 'bg-destructive text-black' : 
+                    'border border-primary text-primary'
+                  }`}>
+                    [{gig.status}]
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 animate-pulse">
+              {">"} _
+            </div>
+          </div>
+        </section>
+
+        <Separator className="bg-primary/30" />
+
         {/* Audio Section */}
         <section className="space-y-8">
           <div className="flex items-center gap-4">
