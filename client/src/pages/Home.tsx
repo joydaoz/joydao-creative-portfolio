@@ -6,9 +6,12 @@ import { ExternalLink, Terminal, Wifi, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import TerminalNewsletter from "@/components/TerminalNewsletter";
 import PortfolioGallery from "@/components/PortfolioGallery";
-import CyberpunkFooter from "@/components/CyberpunkFooter";
+import BootAnimation from "@/components/BootAnimation";
+import ContactForm from "@/components/ContactForm";
+import AnimatedCyberpunkFooter from "@/components/AnimatedCyberpunkFooter";
 
 export default function Home() {
+  const [showBoot, setShowBoot] = useState(true);
   const [glitchActive, setGlitchActive] = useState(false);
   const [bootSequence, setBootSequence] = useState<string[]>([]);
 
@@ -43,6 +46,10 @@ export default function Home() {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  if (showBoot) {
+    return <BootAnimation onComplete={() => setShowBoot(false)} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -261,6 +268,17 @@ export default function Home() {
 
         <Separator className="bg-primary/30" />
 
+        {/* Contact Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-3 h-3 bg-accent animate-pulse"></div>
+            <h2 className="text-3xl font-bold text-accent">SEND_TRANSMISSION</h2>
+          </div>
+          <ContactForm />
+        </section>
+
+        <Separator className="bg-primary/30" />
+
         {/* Newsletter Section */}
         <section className="space-y-4">
           <div className="flex items-center gap-4">
@@ -270,7 +288,7 @@ export default function Home() {
           <TerminalNewsletter />
         </section>
 
-        <CyberpunkFooter />
+        <AnimatedCyberpunkFooter />
       </main>
     </div>
   );
