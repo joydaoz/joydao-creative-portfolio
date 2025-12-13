@@ -47,3 +47,38 @@ export const newsletterSubscriptions = mysqlTable("newsletterSubscriptions", {
 
 export type NewsletterSubscription = typeof newsletterSubscriptions.$inferSelect;
 export type InsertNewsletterSubscription = typeof newsletterSubscriptions.$inferInsert;
+
+// Blog posts
+export const blogPosts = mysqlTable("blogPosts", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  content: text("content").notNull(),
+  excerpt: text("excerpt"),
+  status: mysqlEnum("status", ["draft", "published"]).default("draft").notNull(),
+  publishedAt: timestamp("publishedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type InsertBlogPost = typeof blogPosts.$inferInsert;
+
+// Blog post tags
+export const blogTags = mysqlTable("blogTags", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+});
+
+export type BlogTag = typeof blogTags.$inferSelect;
+export type InsertBlogTag = typeof blogTags.$inferInsert;
+
+// Junction table for blog posts and tags
+export const blogPostTags = mysqlTable("blogPostTags", {
+  postId: int("postId").notNull(),
+  tagId: int("tagId").notNull(),
+});
+
+export type BlogPostTag = typeof blogPostTags.$inferSelect;
+export type InsertBlogPostTag = typeof blogPostTags.$inferInsert;

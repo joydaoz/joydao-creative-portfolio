@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { Trash2, LogOut, Mail, MessageSquare, Lock, Download, Trash, TrendingUp } from "lucide-react";
+import { Trash2, LogOut, Mail, MessageSquare, Lock, Download, Trash, TrendingUp, FileText } from "lucide-react";
 import { useLocation } from "wouter";
+import BlogManager from "@/components/BlogManager";
 
 export default function AdminDashboard() {
   const { user, isAuthenticated, logout } = useAuth();
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState<"messages" | "subscribers">("messages");
+  const [activeTab, setActiveTab] = useState<"messages" | "subscribers" | "blog">("messages");
   const [selectedSubscribers, setSelectedSubscribers] = useState<Set<number>>(new Set());
 
   const contactMessagesQuery = trpc.admin.getContactMessages.useQuery(undefined, {
@@ -235,6 +236,17 @@ export default function AdminDashboard() {
             <Mail className="w-4 h-4 inline mr-2" />
             NEWSLETTER_SUBSCRIBERS ({subscribersQuery.data?.length || 0})
           </button>
+          <button
+            onClick={() => setActiveTab("blog")}
+            className={`px-4 py-2 border-b-2 transition-all ${
+              activeTab === "blog"
+                ? "border-accent text-accent"
+                : "border-transparent text-muted-foreground hover:text-primary"
+            }`}
+          >
+            <FileText className="w-4 h-4 inline mr-2" />
+            BLOG_POSTS
+          </button>
         </div>
 
         {/* Contact Messages Tab */}
@@ -270,6 +282,11 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Blog Posts Tab */}
+        {activeTab === "blog" && (
+          <BlogManager />
         )}
 
         {/* Newsletter Subscribers Tab */}

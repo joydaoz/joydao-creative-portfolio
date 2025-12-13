@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, contactMessages, InsertContactMessage, newsletterSubscriptions, InsertNewsletterSubscription } from "../drizzle/schema";
+import { InsertUser, users, contactMessages, InsertContactMessage, newsletterSubscriptions, InsertNewsletterSubscription, blogPosts, InsertBlogPost, blogTags, InsertBlogTag, blogPostTags } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -141,4 +141,84 @@ export async function unsubscribeFromNewsletter(email: string) {
     throw new Error("Database not available");
   }
   return await db.update(newsletterSubscriptions).set({ isActive: 0 }).where(eq(newsletterSubscriptions.email, email));
+}
+
+// Blog post queries
+export async function createBlogPost(data: InsertBlogPost) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+  const result = await db.insert(blogPosts).values(data);
+  return result;
+}
+
+export async function getBlogPostBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) {
+    return null;
+  }
+  const result = await db.select().from(blogPosts).where(eq(blogPosts.slug, slug)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getPublishedBlogPosts() {
+  const db = await getDb();
+  if (!db) {
+    return [];
+  }
+  return await db.select().from(blogPosts).where(eq(blogPosts.status, "published")).orderBy(blogPosts.publishedAt);
+}
+
+export async function getAllBlogPosts() {
+  const db = await getDb();
+  if (!db) {
+    return [];
+  }
+  return await db.select().from(blogPosts).orderBy(blogPosts.createdAt);
+}
+
+export async function updateBlogPost(id: number, data: Partial<InsertBlogPost>) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+  return await db.update(blogPosts).set(data).where(eq(blogPosts.id, id));
+}
+
+export async function deleteBlogPost(id: number) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+  // Delete associated tags first
+  await db.delete(blogPostTags).where(eq(blogPostTags.postId, id));
+  return await db.delete(blogPosts).where(eq(blogPosts.id, id));
+}
+
+// Blog tag queries
+export async function createBlogTag(data: InsertBlogTag) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+  try {
+    const result = await db.insert(blogTags).values(data);
+    return result;
+  } catch (error: any) {
+    if (error.code === "ER_DUP_ENTRY") {
+      // Tag already exists, return it
+      const existing = await db.select().from(blogTags).where(eq(blogTags.slug, data.slug)).limit(1);
+      return existing[0];
+    }
+    throw error;
+  }
+}
+
+export async function getAllBlogTags() {
+  const db = await getDb();
+  if (!db) {
+    return [];
+  }
+  return await db.select().from(blogTags);
 }

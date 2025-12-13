@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createContactMessage, subscribeToNewsletter, getContactMessages, getNewsletterSubscriptions, unsubscribeFromNewsletter } from "./db";
+import { createContactMessage, subscribeToNewsletter, getContactMessages, getNewsletterSubscriptions, unsubscribeFromNewsletter, createBlogPost, getAllBlogPosts, getBlogPostBySlug, updateBlogPost, deleteBlogPost, getPublishedBlogPosts, createBlogTag, getAllBlogTags } from "./db";
 import { ENV } from "./_core/env";
 
 export const appRouter = router({
@@ -86,6 +86,103 @@ export const appRouter = router({
         await unsubscribeFromNewsletter(input.email);
         return { success: true, message: "Email unsubscribed successfully" };
       }),
+
+    getAllBlogPosts: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.openId !== ENV.ownerOpenId) {
+        throw new Error("Unauthorized: Admin access only");
+      }
+      return await getAllBlogPosts();
+    }),
+
+    createBlogPost: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1, "Title is required"),
+        slug: z.string().min(1, "Slug is required"),
+        content: z.string().min(1, "Content is required"),
+        excerpt: z.string().optional(),
+        status: z.enum(["draft", "published"]),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user?.openId !== ENV.ownerOpenId) {
+          throw new Error("Unauthorized: Admin access only");
+        }
+        try {
+          const publishedAt = input.status === "published" ? new Date() : null;
+          await createBlogPost({
+            title: input.title,
+            slug: input.slug,
+            content: input.content,
+            excerpt: input.excerpt,
+            status: input.status,
+            publishedAt,
+          });
+          return { success: true, message: "Blog post created successfully" };
+        } catch (error) {
+          console.error("Blog post creation error:", error);
+          throw new Error("Failed to create blog post");
+        }
+      }),
+
+    updateBlogPost: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1, "Title is required"),
+        slug: z.string().min(1, "Slug is required"),
+        content: z.string().min(1, "Content is required"),
+        excerpt: z.string().optional(),
+        status: z.enum(["draft", "published"]),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user?.openId !== ENV.ownerOpenId) {
+          throw new Error("Unauthorized: Admin access only");
+        }
+        try {
+          const publishedAt = input.status === "published" ? new Date() : null;
+          await updateBlogPost(input.id, {
+            title: input.title,
+            slug: input.slug,
+            content: input.content,
+            excerpt: input.excerpt,
+            status: input.status,
+            publishedAt,
+          });
+          return { success: true, message: "Blog post updated successfully" };
+        } catch (error) {
+          console.error("Blog post update error:", error);
+          throw new Error("Failed to update blog post");
+        }
+      }),
+
+    deleteBlogPost: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user?.openId !== ENV.ownerOpenId) {
+          throw new Error("Unauthorized: Admin access only");
+        }
+        try {
+          await deleteBlogPost(input.id);
+          return { success: true, message: "Blog post deleted successfully" };
+        } catch (error) {
+          console.error("Blog post deletion error:", error);
+          throw new Error("Failed to delete blog post");
+        }
+      }),
+  }),
+
+  blog: router({
+    getPublishedPosts: publicProcedure.query(async () => {
+      return await getPublishedBlogPosts();
+    }),
+
+    getPostBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        return await getBlogPostBySlug(input.slug);
+      }),
+
+    getAllTags: publicProcedure.query(async () => {
+      return await getAllBlogTags();
+    }),
   }),
 });
 
