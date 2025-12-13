@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { Trash2, LogOut, Mail, MessageSquare, Lock } from "lucide-react";
+import { Trash2, LogOut, Mail, MessageSquare, Lock, Download, Trash } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function AdminDashboard() {
   const { user, isAuthenticated, logout } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<"messages" | "subscribers">("messages");
+  const [selectedSubscribers, setSelectedSubscribers] = useState<Set<number>>(new Set());
 
   const contactMessagesQuery = trpc.admin.getContactMessages.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -21,6 +22,7 @@ export default function AdminDashboard() {
   const unsubscribeMutation = trpc.admin.unsubscribeEmail.useMutation({
     onSuccess: () => {
       subscribersQuery.refetch();
+      setSelectedSubscribers(new Set());
     },
   });
 
@@ -39,6 +41,78 @@ export default function AdminDashboard() {
     window.location.href = getLoginUrl();
   };
 
+  const toggleSubscriberSelection = (id: number) => {
+    const newSelected = new Set(selectedSubscribers);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedSubscribers(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedSubscribers.size === subscribersQuery.data?.length) {
+      setSelectedSubscribers(new Set());
+    } else {
+      const allIds = new Set(subscribersQuery.data?.map((s) => s.id) || []);
+      setSelectedSubscribers(allIds);
+    }
+  };
+
+  const handleBulkUnsubscribe = () => {
+    if (selectedSubscribers.size === 0) {
+      alert("Please select at least one subscriber");
+      return;
+    }
+
+    if (confirm(`Unsubscribe ${selectedSubscribers.size} subscriber(s)?`)) {
+      const selectedEmails = subscribersQuery.data
+        ?.filter((s) => selectedSubscribers.has(s.id))
+        .map((s) => s.email) || [];
+
+      selectedEmails.forEach((email) => {
+        unsubscribeMutation.mutate({ email });
+      });
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (!subscribersQuery.data || subscribersQuery.data.length === 0) {
+      alert("No subscribers to export");
+      return;
+    }
+
+    const selectedData =
+      selectedSubscribers.size > 0
+        ? subscribersQuery.data.filter((s) => selectedSubscribers.has(s.id))
+        : subscribersQuery.data;
+
+    const headers = ["Email", "Subscribed Date", "Status"];
+    const rows = selectedData.map((sub) => [
+      sub.email,
+      new Date(sub.subscribedAt).toISOString(),
+      "ACTIVE",
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute("href", url);
+    link.setAttribute("download", `newsletter_subscribers_${Date.now()}.csv`);
+    link.style.visibility = "hidden";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Show login screen if not authenticated
   if (!isAuthenticated) {
     return (
@@ -49,10 +123,10 @@ export default function AdminDashboard() {
         <div className="w-full h-full max-w-2xl p-8 font-mono text-sm md:text-base text-primary flex flex-col justify-center items-center relative z-10">
           <div className="border-2 border-accent p-8 bg-black text-center max-w-md w-full">
             <Lock className="w-16 h-16 text-accent mx-auto mb-6 animate-pulse" />
-            
+
             <h1 className="text-2xl font-bold text-accent mb-2 tracking-widest">ADMIN_ACCESS</h1>
             <p className="text-muted-foreground mb-6 text-sm">AUTHENTICATION_REQUIRED</p>
-            
+
             <p className="text-primary mb-8 text-sm leading-relaxed">
               You must authenticate to access the admin dashboard. Click below to sign in via OAuth.
             </p>
@@ -163,6 +237,49 @@ export default function AdminDashboard() {
         {/* Newsletter Subscribers Tab */}
         {activeTab === "subscribers" && (
           <div className="space-y-4">
+            {/* Bulk Actions Bar */}
+            {subscribersQuery.data && subscribersQuery.data.length > 0 && (
+              <div className="border border-accent/30 p-4 bg-black/50 flex gap-3 items-center flex-wrap">
+                <span className="text-sm text-muted-foreground">
+                  {selectedSubscribers.size > 0
+                    ? `${selectedSubscribers.size} SELECTED`
+                    : "SELECT_SUBSCRIBERS_FOR_BULK_ACTIONS"}
+                </span>
+
+                {selectedSubscribers.size > 0 && (
+                  <>
+                    <button
+                      onClick={handleBulkUnsubscribe}
+                      disabled={unsubscribeMutation.isPending}
+                      className="flex items-center gap-2 px-3 py-1 text-xs border border-destructive text-destructive hover:bg-destructive hover:text-black transition-all disabled:opacity-50"
+                    >
+                      <Trash className="w-3 h-3" />
+                      BULK_UNSUBSCRIBE
+                    </button>
+
+                    <button
+                      onClick={handleExportCSV}
+                      className="flex items-center gap-2 px-3 py-1 text-xs border border-primary text-primary hover:bg-primary hover:text-black transition-all"
+                    >
+                      <Download className="w-3 h-3" />
+                      EXPORT_SELECTED
+                    </button>
+                  </>
+                )}
+
+                {selectedSubscribers.size === 0 && subscribersQuery.data.length > 0 && (
+                  <button
+                    onClick={handleExportCSV}
+                    className="flex items-center gap-2 px-3 py-1 text-xs border border-primary text-primary hover:bg-primary hover:text-black transition-all"
+                  >
+                    <Download className="w-3 h-3" />
+                    EXPORT_ALL
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Subscribers Table */}
             {subscribersQuery.isLoading ? (
               <div className="text-center py-8">
                 <span className="text-accent animate-pulse">LOADING_SUBSCRIBERS...</span>
@@ -176,6 +293,17 @@ export default function AdminDashboard() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-accent/30">
+                      <th className="text-left p-3 text-accent w-8">
+                        <input
+                          type="checkbox"
+                          checked={
+                            subscribersQuery.data && subscribersQuery.data.length > 0 &&
+                            selectedSubscribers.size === subscribersQuery.data.length
+                          }
+                          onChange={toggleSelectAll}
+                          className="w-4 h-4 cursor-pointer"
+                        />
+                      </th>
                       <th className="text-left p-3 text-accent">EMAIL</th>
                       <th className="text-left p-3 text-accent">SUBSCRIBED_DATE</th>
                       <th className="text-left p-3 text-accent">STATUS</th>
@@ -188,6 +316,14 @@ export default function AdminDashboard() {
                         key={subscriber.id}
                         className="border-b border-accent/20 hover:bg-accent/5 transition-all"
                       >
+                        <td className="p-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedSubscribers.has(subscriber.id)}
+                            onChange={() => toggleSubscriberSelection(subscriber.id)}
+                            className="w-4 h-4 cursor-pointer"
+                          />
+                        </td>
                         <td className="p-3 text-primary">{subscriber.email}</td>
                         <td className="p-3 text-muted-foreground text-xs">
                           {new Date(subscriber.subscribedAt).toLocaleString()}
