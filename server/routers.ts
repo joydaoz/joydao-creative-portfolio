@@ -1,9 +1,10 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createContactMessage, subscribeToNewsletter } from "./db";
+import { createContactMessage, subscribeToNewsletter, getContactMessages, getNewsletterSubscriptions, unsubscribeFromNewsletter } from "./db";
+import { ENV } from "./_core/env";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -58,6 +59,32 @@ export const appRouter = router({
           }
           throw new Error("Failed to subscribe to newsletter");
         }
+      }),
+  }),
+
+  admin: router({
+    getContactMessages: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.openId !== ENV.ownerOpenId) {
+        throw new Error("Unauthorized: Admin access only");
+      }
+      return await getContactMessages();
+    }),
+
+    getNewsletterSubscribers: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.openId !== ENV.ownerOpenId) {
+        throw new Error("Unauthorized: Admin access only");
+      }
+      return await getNewsletterSubscriptions();
+    }),
+
+    unsubscribeEmail: protectedProcedure
+      .input(z.object({ email: z.string().email("Invalid email") }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user?.openId !== ENV.ownerOpenId) {
+          throw new Error("Unauthorized: Admin access only");
+        }
+        await unsubscribeFromNewsletter(input.email);
+        return { success: true, message: "Email unsubscribed successfully" };
       }),
   }),
 });
