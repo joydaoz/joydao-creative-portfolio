@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { Trash2, LogOut, Mail, MessageSquare, Lock, Download, Trash } from "lucide-react";
+import { Trash2, LogOut, Mail, MessageSquare, Lock, Download, Trash, TrendingUp } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function AdminDashboard() {
@@ -173,6 +173,44 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto p-4">
+        {/* Analytics Summary Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          {/* Total Messages Card */}
+          <div className="border border-accent/30 p-4 bg-black/50 hover:border-accent transition-all hover:shadow-[0_0_10px_rgba(0,255,150,0.1)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">TOTAL_MESSAGES</p>
+                <p className="text-3xl font-bold text-accent">{contactMessagesQuery.data?.length || 0}</p>
+              </div>
+              <MessageSquare className="w-8 h-8 text-accent/50" />
+            </div>
+          </div>
+
+          {/* Total Subscribers Card */}
+          <div className="border border-accent/30 p-4 bg-black/50 hover:border-accent transition-all hover:shadow-[0_0_10px_rgba(0,255,150,0.1)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">ACTIVE_SUBSCRIBERS</p>
+                <p className="text-3xl font-bold text-accent">{subscribersQuery.data?.length || 0}</p>
+              </div>
+              <Mail className="w-8 h-8 text-accent/50" />
+            </div>
+          </div>
+
+          {/* System Status Card */}
+          <div className="border border-accent/30 p-4 bg-black/50 hover:border-accent transition-all hover:shadow-[0_0_10px_rgba(0,255,150,0.1)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">SYSTEM_STATUS</p>
+                <p className="text-3xl font-bold text-primary">ONLINE</p>
+              </div>
+              <div className="w-8 h-8 border-2 border-primary rounded-full flex items-center justify-center">
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Tab Navigation */}
         <div className="flex gap-2 mb-6 border-b border-accent/30">
           <button
