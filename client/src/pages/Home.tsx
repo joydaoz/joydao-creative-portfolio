@@ -6,6 +6,7 @@ import { ExternalLink, Terminal, Wifi, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import TerminalNewsletter from "@/components/TerminalNewsletter";
 import PortfolioGallery from "@/components/PortfolioGallery";
+import CyberpunkFooter from "@/components/CyberpunkFooter";
 
 export default function Home() {
   const [glitchActive, setGlitchActive] = useState(false);
@@ -269,18 +270,7 @@ export default function Home() {
           <TerminalNewsletter />
         </section>
 
-        {/* Footer */}
-        <footer className="border-t border-primary/30 pt-8 pb-12 text-center font-mono text-sm text-muted-foreground">
-          <div className="mb-4 flex justify-center gap-4">
-            <div className="w-2 h-2 bg-primary animate-pulse"></div>
-            <div className="w-2 h-2 bg-accent animate-pulse delay-75"></div>
-            <div className="w-2 h-2 bg-primary animate-pulse delay-150"></div>
-          </div>
-          <p>
-            SYSTEM SHUTDOWN IMMINENT... <br/>
-            © 2025 JOYDAO.Z // ALL RIGHTS RESERVED
-          </p>
-        </footer>
+        <CyberpunkFooter />
       </main>
     </div>
   );
