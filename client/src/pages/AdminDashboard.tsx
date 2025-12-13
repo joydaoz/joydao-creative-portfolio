@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { Trash2, LogOut, Mail, MessageSquare } from "lucide-react";
+import { Trash2, LogOut, Mail, MessageSquare, Lock } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function AdminDashboard() {
@@ -23,16 +24,6 @@ export default function AdminDashboard() {
     },
   });
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setLocation("/");
-    }
-  }, [isAuthenticated, setLocation]);
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
   const handleLogout = async () => {
     await logout();
     setLocation("/");
@@ -43,6 +34,47 @@ export default function AdminDashboard() {
       unsubscribeMutation.mutate({ email });
     }
   };
+
+  const handleLogin = () => {
+    window.location.href = getLoginUrl();
+  };
+
+  // Show login screen if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black text-primary font-mono flex items-center justify-center">
+        {/* CRT Overlay */}
+        <div className="fixed inset-0 z-50 crt-overlay opacity-50 pointer-events-none"></div>
+
+        <div className="w-full h-full max-w-2xl p-8 font-mono text-sm md:text-base text-primary flex flex-col justify-center items-center relative z-10">
+          <div className="border-2 border-accent p-8 bg-black text-center max-w-md w-full">
+            <Lock className="w-16 h-16 text-accent mx-auto mb-6 animate-pulse" />
+            
+            <h1 className="text-2xl font-bold text-accent mb-2 tracking-widest">ADMIN_ACCESS</h1>
+            <p className="text-muted-foreground mb-6 text-sm">AUTHENTICATION_REQUIRED</p>
+            
+            <p className="text-primary mb-8 text-sm leading-relaxed">
+              You must authenticate to access the admin dashboard. Click below to sign in via OAuth.
+            </p>
+
+            <button
+              onClick={handleLogin}
+              className="w-full px-6 py-3 border-2 border-accent text-accent hover:bg-accent hover:text-black transition-all font-bold tracking-widest mb-4"
+            >
+              LOGIN_TO_ADMIN
+            </button>
+
+            <button
+              onClick={() => setLocation("/")}
+              className="w-full px-6 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-black transition-all font-bold tracking-widest"
+            >
+              RETURN_HOME
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-primary font-mono">
