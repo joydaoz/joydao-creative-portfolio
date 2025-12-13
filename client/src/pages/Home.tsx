@@ -1,15 +1,16 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { ExternalLink, Terminal, Wifi, Zap } from "lucide-react";
+import { ExternalLink, Terminal, Wifi, Zap, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/_core/hooks/useAuth";
 import TerminalNewsletter from "@/components/TerminalNewsletter";
 import PortfolioGallery from "@/components/PortfolioGallery";
 import BootAnimation from "@/components/BootAnimation";
 import ContactForm from "@/components/ContactForm";
 import AnimatedCyberpunkFooter from "@/components/AnimatedCyberpunkFooter";
+import { useLocation } from "wouter";
 
 export default function Home() {
   // The userAuth hooks provides authentication state
@@ -135,6 +136,7 @@ export default function Home() {
                   <div className="absolute inset-0 bg-green-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 </a>
               </Button>
+              <BlogNavLink />
             </div>
           </div>
 
@@ -296,5 +298,21 @@ export default function Home() {
         <AnimatedCyberpunkFooter />
       </main>
     </div>
+  );
+}
+
+function BlogNavLink() {
+  const [, setLocation] = useLocation();
+  return (
+    <Button 
+      variant="outline" 
+      className="border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-black rounded-none uppercase tracking-widest group relative overflow-hidden"
+      onClick={() => setLocation("/blog")}
+    >
+      <span className="relative z-10 flex items-center gap-2">
+        Blog <FileText className="w-4 h-4" />
+      </span>
+      <div className="absolute inset-0 bg-purple-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+    </Button>
   );
 }
