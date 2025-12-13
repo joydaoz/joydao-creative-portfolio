@@ -1,3 +1,4 @@
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,6 +12,10 @@ import ContactForm from "@/components/ContactForm";
 import AnimatedCyberpunkFooter from "@/components/AnimatedCyberpunkFooter";
 
 export default function Home() {
+  // The userAuth hooks provides authentication state
+  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
+  let { user, loading, error, isAuthenticated, logout } = useAuth();
+
   const [showBoot, setShowBoot] = useState(true);
   const [glitchActive, setGlitchActive] = useState(false);
   const [bootSequence, setBootSequence] = useState<string[]>([]);

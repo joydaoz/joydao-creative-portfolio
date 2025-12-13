@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 interface FormData {
   name: string;
@@ -13,11 +14,12 @@ export default function ContactForm() {
     email: "",
     message: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">(
     "idle"
   );
   const [statusMessage, setStatusMessage] = useState("");
+
+  const contactMutation = trpc.contact.submit.useMutation();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -46,15 +48,14 @@ export default function ContactForm() {
       return;
     }
 
-    setIsSubmitting(true);
     setSubmitStatus("idle");
 
     try {
-      // Simulate form submission
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // In a real app, you would send this to a backend service
-      console.log("Form submitted:", formData);
+      await contactMutation.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+      });
 
       setSubmitStatus("success");
       setStatusMessage("✓ MESSAGE_TRANSMITTED_SUCCESSFULLY");
@@ -68,10 +69,11 @@ export default function ContactForm() {
     } catch (error) {
       setSubmitStatus("error");
       setStatusMessage("ERROR: TRANSMISSION_FAILED");
-    } finally {
-      setIsSubmitting(false);
+      console.error("Contact form error:", error);
     }
   };
+
+  const isSubmitting = contactMutation.isPending;
 
   return (
     <section className="border border-accent bg-black p-1 shadow-[0_0_15px_rgba(255,0,85,0.2)]">

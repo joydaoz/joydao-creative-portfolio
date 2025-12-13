@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Mail, Send } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 interface TerminalLine {
   type: "input" | "output" | "command";
@@ -9,7 +10,6 @@ interface TerminalLine {
 
 export default function TerminalNewsletter() {
   const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [terminalLines, setTerminalLines] = useState<TerminalLine[]>([
     { type: "output", text: "NEURAL_MAIL_PROTOCOL v2.1.4" },
@@ -17,6 +17,8 @@ export default function TerminalNewsletter() {
     { type: "output", text: "" },
   ]);
   const terminalRef = useRef<HTMLDivElement>(null);
+
+  const newsletterMutation = trpc.newsletter.subscribe.useMutation();
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -48,7 +50,6 @@ export default function TerminalNewsletter() {
       return;
     }
 
-    setIsSubmitting(true);
     addTerminalLine("input", `SUBSCRIBE ${email}`);
     addTerminalLine("output", "PROCESSING REQUEST...");
 
@@ -61,22 +62,31 @@ export default function TerminalNewsletter() {
     addTerminalLine("output", "ENCRYPTION_PROTOCOL: ENABLED");
     await new Promise((resolve) => setTimeout(resolve, 600));
 
-    addTerminalLine("output", "");
-    addTerminalLine("output", "✓ SUBSCRIPTION_CONFIRMED");
-    addTerminalLine("output", `✓ EMAIL_REGISTERED: ${email}`);
-    addTerminalLine("output", "✓ ACCESS_GRANTED_TO_INNER_CIRCLE");
-    addTerminalLine("output", "");
-    addTerminalLine("output", "YOU WILL RECEIVE UPDATES ON:");
-    addTerminalLine("output", "• NEW_RELEASES");
-    addTerminalLine("output", "• LIVE_EVENTS");
-    addTerminalLine("output", "• EXCLUSIVE_CONTENT");
-    addTerminalLine("output", "");
-    addTerminalLine("output", "WELCOME_TO_THE_NETWORK, AGENT.");
+    try {
+      await newsletterMutation.mutateAsync({ email });
 
-    setIsSubscribed(true);
-    setEmail("");
-    setIsSubmitting(false);
+      addTerminalLine("output", "");
+      addTerminalLine("output", "✓ SUBSCRIPTION_CONFIRMED");
+      addTerminalLine("output", `✓ EMAIL_REGISTERED: ${email}`);
+      addTerminalLine("output", "✓ ACCESS_GRANTED_TO_INNER_CIRCLE");
+      addTerminalLine("output", "");
+      addTerminalLine("output", "YOU WILL RECEIVE UPDATES ON:");
+      addTerminalLine("output", "• NEW_RELEASES");
+      addTerminalLine("output", "• LIVE_EVENTS");
+      addTerminalLine("output", "• EXCLUSIVE_CONTENT");
+      addTerminalLine("output", "");
+      addTerminalLine("output", "WELCOME_TO_THE_NETWORK, AGENT.");
+
+      setIsSubscribed(true);
+      setEmail("");
+    } catch (error) {
+      addTerminalLine("output", "ERROR: SUBSCRIPTION_FAILED");
+      addTerminalLine("output", "PLEASE_TRY_AGAIN_LATER");
+      console.error("Newsletter subscription error:", error);
+    }
   };
+
+  const isSubmitting = newsletterMutation.isPending;
 
   return (
     <section className="border border-accent bg-black p-1 shadow-[0_0_15px_rgba(255,0,85,0.2)]">
@@ -150,13 +160,14 @@ export default function TerminalNewsletter() {
             <button
               onClick={() => {
                 setIsSubscribed(false);
+                setEmail("");
                 setTerminalLines([
                   { type: "output", text: "NEURAL_MAIL_PROTOCOL v2.1.4" },
                   { type: "output", text: "TYPE 'SUBSCRIBE' TO JOIN THE NETWORK" },
                   { type: "output", text: "" },
                 ]);
               }}
-              className="text-xs text-accent hover:text-primary transition-colors font-mono underline"
+              className="w-full text-accent hover:text-primary transition-colors font-mono text-sm border border-accent p-2 hover:bg-accent/10"
             >
               RESET_FORM
             </button>
