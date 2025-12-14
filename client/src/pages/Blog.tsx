@@ -1,23 +1,51 @@
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { FileText, Calendar, ArrowRight } from "lucide-react";
+import { FileText, Calendar, ArrowRight, X } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function Blog() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const postsQuery = trpc.blog.getPublishedPosts.useQuery();
 
+  // Extract all unique tags from posts
+  const allTags = useMemo(() => {
+    if (!postsQuery.data) return [];
+    const tags = new Set<string>();
+    postsQuery.data.forEach((post) => {
+      post.tags?.forEach((tag) => tags.add(tag.name));
+    });
+    return Array.from(tags).sort();
+  }, [postsQuery.data]);
+
+  // Filter posts based on search query and selected tags
   const filteredPosts = useMemo(() => {
     if (!postsQuery.data) return [];
-    return postsQuery.data.filter((post) =>
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [postsQuery.data, searchQuery]);
+    return postsQuery.data.filter((post) => {
+      // Search query filter
+      const matchesSearch =
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Tag filter
+      const postTags = post.tags?.map((tag) => tag.name) || [];
+      const matchesTags =
+        selectedTags.length === 0 ||
+        selectedTags.some((tag) => postTags.includes(tag));
+
+      return matchesSearch && matchesTags;
+    });
+  }, [postsQuery.data, searchQuery, selectedTags]);
 
   const handlePostClick = (slug: string) => {
     setLocation(`/blog/${slug}`);
+  };
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
   };
 
   const formatDate = (date: Date | null) => {
@@ -49,7 +77,7 @@ export default function Blog() {
       {/* Search Bar */}
       <div className="border-b border-accent/30 py-6 px-4 md:px-8 bg-black/50">
         <div className="max-w-6xl mx-auto">
-          <div className="relative">
+          <div className="relative mb-6">
             <span className="absolute left-3 top-3 text-accent text-sm">&gt;</span>
             <input
               type="text"
@@ -59,6 +87,56 @@ export default function Blog() {
               className="w-full pl-8 pr-4 py-2 bg-black border border-accent/30 text-primary placeholder-muted-foreground focus:border-accent outline-none font-mono text-sm transition-all"
             />
           </div>
+
+          {/* Tags Filter */}
+          {allTags.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground font-mono">
+                FILTER_BY_TAGS:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {allTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`px-3 py-1 text-xs font-mono border transition-all ${
+                      selectedTags.includes(tag)
+                        ? "border-accent bg-accent text-black"
+                        : "border-accent/30 text-accent hover:border-accent"
+                    }`}
+                  >
+                    {tag.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+
+              {/* Active Tags Display */}
+              {selectedTags.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-accent/20">
+                  {selectedTags.map((tag) => (
+                    <div
+                      key={tag}
+                      className="flex items-center gap-2 px-3 py-1 bg-accent/10 border border-accent/30 text-accent text-xs font-mono"
+                    >
+                      <span>{tag}</span>
+                      <button
+                        onClick={() => toggleTag(tag)}
+                        className="hover:text-primary transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => setSelectedTags([])}
+                    className="px-3 py-1 text-xs font-mono border border-accent/30 text-muted-foreground hover:text-accent transition-colors"
+                  >
+                    CLEAR_ALL
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -74,7 +152,7 @@ export default function Blog() {
           ) : filteredPosts.length === 0 ? (
             <div className="border border-accent/30 p-8 text-center bg-black/50">
               <p className="text-muted-foreground font-mono">
-                NO_POSTS_FOUND. TRY_DIFFERENT_SEARCH_QUERY.
+                NO_POSTS_FOUND. TRY_DIFFERENT_SEARCH_QUERY_OR_TAGS.
               </p>
             </div>
           ) : (
@@ -103,6 +181,20 @@ export default function Blog() {
                     <p className="text-sm text-primary mb-4 line-clamp-3">
                       {post.excerpt}
                     </p>
+                  )}
+
+                  {/* Post Tags */}
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {post.tags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          className="text-xs px-2 py-1 bg-accent/10 border border-accent/30 text-accent font-mono"
+                        >
+                          {tag.name}
+                        </span>
+                      ))}
+                    </div>
                   )}
 
                   {/* Post Meta */}
@@ -146,9 +238,9 @@ export default function Blog() {
             </div>
             <div className="border border-accent/20 p-4">
               <p className="text-2xl font-bold text-accent">
-                {new Date().getFullYear()}
+                {allTags.length}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">CURRENT_YEAR</p>
+              <p className="text-xs text-muted-foreground mt-1">TOTAL_TAGS</p>
             </div>
             <div className="border border-accent/20 p-4">
               <p className="text-2xl font-bold text-primary">ACTIVE</p>

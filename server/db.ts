@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, contactMessages, InsertContactMessage, newsletterSubscriptions, InsertNewsletterSubscription, blogPosts, InsertBlogPost, blogTags, InsertBlogTag, blogPostTags } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -159,7 +159,16 @@ export async function getBlogPostBySlug(slug: string) {
     return null;
   }
   const result = await db.select().from(blogPosts).where(eq(blogPosts.slug, slug)).limit(1);
-  return result.length > 0 ? result[0] : null;
+  if (result.length === 0) return null;
+  
+  const post = result[0];
+  const tags = await db
+    .select({ id: blogTags.id, name: blogTags.name, slug: blogTags.slug })
+    .from(blogPostTags)
+    .innerJoin(blogTags, eq(blogPostTags.tagId, blogTags.id))
+    .where(eq(blogPostTags.postId, post.id));
+  
+  return { ...post, tags };
 }
 
 export async function getPublishedBlogPosts() {
@@ -167,7 +176,21 @@ export async function getPublishedBlogPosts() {
   if (!db) {
     return [];
   }
-  return await db.select().from(blogPosts).where(eq(blogPosts.status, "published")).orderBy(blogPosts.publishedAt);
+  const posts = await db.select().from(blogPosts).where(eq(blogPosts.status, "published")).orderBy(desc(blogPosts.publishedAt));
+  
+  // Fetch tags for each post
+  const postsWithTags = await Promise.all(
+    posts.map(async (post) => {
+      const tags = await db
+        .select({ id: blogTags.id, name: blogTags.name, slug: blogTags.slug })
+        .from(blogPostTags)
+        .innerJoin(blogTags, eq(blogPostTags.tagId, blogTags.id))
+        .where(eq(blogPostTags.postId, post.id));
+      return { ...post, tags };
+    })
+  );
+  
+  return postsWithTags;
 }
 
 export async function getAllBlogPosts() {
