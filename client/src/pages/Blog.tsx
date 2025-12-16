@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { FileText, Calendar, ArrowRight, X } from "lucide-react";
+import { FileText, Calendar, ArrowRight, X, Rss } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function Blog() {
@@ -62,11 +62,23 @@ export default function Blog() {
       {/* Header */}
       <div className="border-b border-accent/30 py-12 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-3 mb-4">
-            <FileText className="w-6 h-6 text-accent" />
-            <h1 className="text-3xl md:text-4xl font-bold text-accent font-mono">
-              BLOG
-            </h1>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <FileText className="w-6 h-6 text-accent" />
+              <h1 className="text-3xl md:text-4xl font-bold text-accent font-mono">
+                BLOG
+              </h1>
+            </div>
+            <a
+              href="/blog/feed.xml"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3 py-2 border border-accent/30 text-accent hover:border-accent hover:bg-accent/10 transition-all text-sm font-mono"
+              title="Subscribe to RSS Feed"
+            >
+              <Rss className="w-4 h-4" />
+              RSS
+            </a>
           </div>
           <p className="text-muted-foreground text-sm md:text-base">
             &gt; ACCESSING_NEURAL_DATABASE.BLOG_POSTS... ({filteredPosts.length} POSTS_FOUND)
