@@ -11,6 +11,7 @@ import BootAnimation from "@/components/BootAnimation";
 import ContactForm from "@/components/ContactForm";
 import AnimatedCyberpunkFooter from "@/components/AnimatedCyberpunkFooter";
 import LatestReleases from "@/components/LatestReleases";
+import SocialMediaFeeds from "@/components/SocialMediaFeeds";
 import { useLocation } from "wouter";
 
 export default function Home() {
@@ -278,6 +279,11 @@ export default function Home() {
 
         {/* Portfolio Section */}
         <PortfolioGallery />
+
+        <Separator className="bg-primary/30" />
+
+        {/* Social Media Feeds Section */}
+        <SocialMediaFeeds />
 
         <Separator className="bg-primary/30" />
 
