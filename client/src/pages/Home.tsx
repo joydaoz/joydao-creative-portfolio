@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { ExternalLink, Terminal, Wifi, Zap, FileText } from "lucide-react";
+import { ExternalLink, Terminal, Wifi, Zap, FileText, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import TerminalNewsletter from "@/components/TerminalNewsletter";
@@ -139,6 +139,7 @@ export default function Home() {
                 </a>
               </Button>
               <BlogNavLink />
+              <CollaboratorsNavLink />
             </div>
           </div>
 
@@ -325,6 +326,22 @@ function BlogNavLink() {
         Blog <FileText className="w-4 h-4" />
       </span>
       <div className="absolute inset-0 bg-purple-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+    </Button>
+  );
+}
+
+function CollaboratorsNavLink() {
+  const [, setLocation] = useLocation();
+  return (
+    <Button 
+      variant="outline" 
+      className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black rounded-none uppercase tracking-widest group relative overflow-hidden"
+      onClick={() => setLocation("/collaborators")}
+    >
+      <span className="relative z-10 flex items-center gap-2">
+        Collaborators <Users className="w-4 h-4" />
+      </span>
+      <div className="absolute inset-0 bg-yellow-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
     </Button>
   );
 }
