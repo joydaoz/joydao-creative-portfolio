@@ -10,6 +10,7 @@ import PortfolioGallery from "@/components/PortfolioGallery";
 import BootAnimation from "@/components/BootAnimation";
 import ContactForm from "@/components/ContactForm";
 import AnimatedCyberpunkFooter from "@/components/AnimatedCyberpunkFooter";
+import LatestReleases from "@/components/LatestReleases";
 import { useLocation } from "wouter";
 
 export default function Home() {
@@ -267,6 +268,11 @@ export default function Home() {
             </Card>
           </div>
         </section>
+
+        <Separator className="bg-primary/30" />
+
+        {/* Latest Releases Section */}
+        <LatestReleases />
 
         <Separator className="bg-primary/30" />
 

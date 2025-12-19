@@ -5,6 +5,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { createContactMessage, subscribeToNewsletter, getContactMessages, getNewsletterSubscriptions, unsubscribeFromNewsletter, createBlogPost, getAllBlogPosts, getBlogPostBySlug, updateBlogPost, deleteBlogPost, getPublishedBlogPosts, createBlogTag, getAllBlogTags } from "./db";
 import { ENV } from "./_core/env";
+import { getLatestUploads } from "./youtube";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -183,6 +184,20 @@ export const appRouter = router({
     getAllTags: publicProcedure.query(async () => {
       return await getAllBlogTags();
     }),
+  }),
+
+  youtube: router({
+    getLatestReleases: publicProcedure
+      .input(z.object({ limit: z.number().min(1).max(10).default(3) }).optional())
+      .query(async ({ input }) => {
+        try {
+          const limit = input?.limit || 3;
+          return await getLatestUploads(limit);
+        } catch (error) {
+          console.error("Error fetching YouTube releases:", error);
+          throw new Error("Failed to fetch latest releases");
+        }
+      }),
   }),
 });
 
