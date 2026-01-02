@@ -12,6 +12,7 @@ import ContactForm from "@/components/ContactForm";
 import AnimatedCyberpunkFooter from "@/components/AnimatedCyberpunkFooter";
 import LatestReleases from "@/components/LatestReleases";
 import SocialMediaFeeds from "@/components/SocialMediaFeeds";
+import AudioPlayer from "@/components/AudioPlayer";
 import { useLocation } from "wouter";
 
 export default function Home() {
@@ -210,6 +211,17 @@ export default function Home() {
               {">"} _
             </div>
           </div>
+        </section>
+
+        <Separator className="bg-primary/30" />
+
+        {/* Audio Player Widget */}
+        <section className="space-y-8">
+          <div className="flex items-center gap-4">
+            <Terminal className="w-8 h-8 text-green-500" />
+            <h2 className="text-3xl font-bold text-green-500">AUDIO_PLAYER</h2>
+          </div>
+          <AudioPlayer />
         </section>
 
         <Separator className="bg-primary/30" />
