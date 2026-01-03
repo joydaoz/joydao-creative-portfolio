@@ -72,3 +72,14 @@
 - [x] Integrate visualizer into AudioPlayer component
 - [x] Test visualization performance and responsiveness
 - [x] Write vitest tests for waveform visualization
+
+
+## Beat Detection & Sync (Complete)
+- [x] Create BeatDetector utility with frequency analysis
+- [x] Implement kick drum detection (low frequency analysis)
+- [x] Implement bass detection (sub-bass frequency analysis)
+- [x] Add beat history tracking and smoothing
+- [x] Integrate beat detection into AdvancedWaveformVisualizer
+- [x] Add beat-sync pulse effects to visualization
+- [x] Write vitest tests for beat detection
+- [x] Optimize performance and test with various audio
