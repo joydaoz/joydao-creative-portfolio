@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import AdvancedWaveformVisualizer from "./AdvancedWaveformVisualizer";
 
 interface Track {
   id: string;
@@ -151,6 +152,12 @@ export default function AudioPlayer() {
             </h3>
             <p className="font-mono text-sm text-green-500/70">{currentTrack.artist}</p>
           </div>
+
+          {/* Waveform Visualizer */}
+          <AdvancedWaveformVisualizer
+            audioElement={audioRef.current}
+            isPlaying={isPlaying}
+          />
 
           {/* Progress Bar */}
           <div className="space-y-2">
