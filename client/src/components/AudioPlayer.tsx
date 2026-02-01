@@ -4,6 +4,8 @@ import { Slider } from "@/components/ui/slider";
 import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import AdvancedWaveformVisualizer from "./AdvancedWaveformVisualizer";
+import { useBeatAnimation } from "@/hooks/useBeatAnimation";
+import { BeatDetector, BeatData } from "@/lib/beatDetector";
 
 interface Track {
   id: string;
@@ -58,7 +60,21 @@ export default function AudioPlayer() {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(70);
   const [isMuted, setIsMuted] = useState(false);
+  const [beatData, setBeatData] = useState<BeatData | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const beatDetectorRef = useRef<BeatDetector | null>(null);
+
+  const { triggerBeat } = useBeatAnimation(
+    {
+      elementId: "play-button",
+      preset: "pulse",
+      intensity: 0.4,
+      duration: 200,
+      triggerOnBeat: true,
+    },
+    beatData
+  );
 
   const currentTrack = tracks[currentTrackIndex];
 
@@ -186,6 +202,7 @@ export default function AudioPlayer() {
             </Button>
 
             <Button
+              id="play-button"
               variant="outline"
               size="icon"
               onClick={togglePlay}

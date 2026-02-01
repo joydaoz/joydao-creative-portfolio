@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { BeatDetector, BeatData } from "@/lib/beatDetector";
+import { FrequencyColorMapper } from "@/lib/frequencyColorMapper";
 
 interface AdvancedWaveformVisualizerProps {
   audioElement: HTMLAudioElement | null;
@@ -16,6 +17,7 @@ export default function AdvancedWaveformVisualizer({
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const beatDetectorRef = useRef<BeatDetector | null>(null);
+  const colorMapperRef = useRef<FrequencyColorMapper>(new FrequencyColorMapper());
   const animationIdRef = useRef<number | null>(null);
   const [mode, setMode] = useState<VisualizationMode>("bars");
   const [beatData, setBeatData] = useState<BeatData | null>(null);
@@ -82,19 +84,25 @@ export default function AdvancedWaveformVisualizer({
         barHeight *= pulseDecay;
       }
 
-      // Cyberpunk gradient: green to red
-      const hue = (i / data.length) * 120;
-      const saturation = 100;
-      const lightness = 50 + (data[i] / 255) * 30;
+      // Get frequency-specific color
+      const nyquist = 22050;
+      const frequencyHz = (i / data.length) * nyquist;
+      const color = colorMapperRef.current.getColorWithMagnitude(
+        frequencyHz,
+        data[i],
+        255,
+        100
+      );
 
-      ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+      ctx.fillStyle = color;
       ctx.fillRect(x, height - barHeight, barWidth - 2, barHeight);
 
       // Enhanced glow on beat
       const glowIntensity = beatData?.isBeat ? 0.8 : 0.6;
-      ctx.shadowColor = `hsla(${hue}, ${saturation}%, ${lightness}%, ${glowIntensity})`;
+      const glowColor = color.replace("hsl", "hsla").replace(")", `, ${glowIntensity})`);
+      ctx.shadowColor = glowColor;
       ctx.shadowBlur = beatData?.isBeat ? 15 : 10;
-      ctx.strokeStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${glowIntensity})`;
+      ctx.strokeStyle = glowColor;
       ctx.lineWidth = 1;
       ctx.strokeRect(x, height - barHeight, barWidth - 2, barHeight);
 
@@ -183,15 +191,20 @@ export default function AdvancedWaveformVisualizer({
       const x2 = centerX + Math.cos(angle) * (radius + barLength);
       const y2 = centerY + Math.sin(angle) * (radius + barLength);
 
-      const hue = (i / data.length) * 120;
-      const saturation = 100;
-      const lightness = 50 + value * 30;
+      const nyquist = 22050;
+      const frequencyHz = (i / data.length) * nyquist;
+      const color = colorMapperRef.current.getColorWithMagnitude(
+        frequencyHz,
+        data[i],
+        255,
+        100
+      );
 
-      ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+      ctx.strokeStyle = color;
       ctx.lineWidth = beatData?.isBeat ? 4 : 3;
-      ctx.shadowColor = `hsla(${hue}, ${saturation}%, ${lightness}%, ${
-        beatData?.isBeat ? 0.9 : 0.8
-      })`;
+      const glowIntensity = beatData?.isBeat ? 0.9 : 0.8;
+      const glowColor = color.replace("hsl", "hsla").replace(")", `, ${glowIntensity})`);
+      ctx.shadowColor = glowColor;
       ctx.shadowBlur = beatData?.isBeat ? 15 : 10;
 
       ctx.beginPath();
