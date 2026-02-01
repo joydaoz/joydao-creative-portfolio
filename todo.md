@@ -106,3 +106,12 @@
 - [x] Fetch latest video from YouTube API
 - [x] Update video element to display newest release
 - [x] Test that video updates when new releases are published
+
+
+## Video Carousel Feature (Complete)
+- [x] Create VideoCarousel component with navigation controls
+- [x] Implement carousel state management and smooth transitions
+- [x] Add thumbnail display with video metadata
+- [x] Integrate carousel into Home page hero section
+- [x] Write tests for carousel functionality
+- [x] Test carousel on different screen sizes
