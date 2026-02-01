@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { ExternalLink, Terminal, Wifi, Zap, FileText, Users, Briefcase } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 import TerminalNewsletter from "@/components/TerminalNewsletter";
 import PortfolioGallery from "@/components/PortfolioGallery";
 import BootAnimation from "@/components/BootAnimation";
@@ -23,6 +24,20 @@ export default function Home() {
   const [showBoot, setShowBoot] = useState(true);
   const [glitchActive, setGlitchActive] = useState(false);
   const [bootSequence, setBootSequence] = useState<string[]>([]);
+  const [latestVideoId, setLatestVideoId] = useState<string | null>(null);
+  const [latestVideoDate, setLatestVideoDate] = useState<string>("LOADING...");
+
+  const latestVideoQuery = trpc.youtube.getLatestReleases.useQuery({ limit: 1 }, { enabled: true });
+
+  useEffect(() => {
+    if (latestVideoQuery.data && latestVideoQuery.data.length > 0) {
+      const video = latestVideoQuery.data[0];
+      setLatestVideoId(video.id);
+      const date = new Date(video.publishedAt);
+      const formattedDate = date.toISOString().split('T')[0];
+      setLatestVideoDate(formattedDate);
+    }
+  }, [latestVideoQuery.data]);
 
   // Simulate boot sequence
   useEffect(() => {
@@ -149,21 +164,27 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 blur-xl animate-pulse"></div>
             <div className="border-2 border-primary bg-black p-1 relative z-10 shadow-[0_0_20px_rgba(0,255,65,0.3)]">
               <div className="aspect-video w-full bg-black relative overflow-hidden group">
-                <iframe 
-                  width="100%" 
-                  height="100%" 
-                  src="https://www.youtube.com/embed/0wxbt3Rkiks?autoplay=0&controls=1&rel=0&modestbranding=1" 
-                  title="YouTube video player" 
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                  className="w-full h-full grayscale group-hover:grayscale-0 transition-all duration-500"
-                ></iframe>
+                {latestVideoId ? (
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src={`https://www.youtube.com/embed/${latestVideoId}?autoplay=0&controls=1&rel=0&modestbranding=1`}
+                    title="YouTube video player" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen
+                    className="w-full h-full grayscale group-hover:grayscale-0 transition-all duration-500"
+                  ></iframe>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-black/50 text-muted-foreground font-mono text-sm">
+                    LOADING_VIDEO...
+                  </div>
+                )}
                 <div className="absolute inset-0 pointer-events-none bg-scanlines opacity-20"></div>
               </div>
               <div className="bg-primary text-black text-xs font-bold p-1 flex justify-between">
                 <span>LATEST_TRANSMISSION</span>
-                <span>REC_DATE: 2025-10-12</span>
+                <span>REC_DATE: {latestVideoDate}</span>
               </div>
             </div>
           </div>
