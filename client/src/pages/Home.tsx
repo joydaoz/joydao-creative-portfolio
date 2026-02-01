@@ -15,6 +15,7 @@ import LatestReleases from "@/components/LatestReleases";
 import SocialMediaFeeds from "@/components/SocialMediaFeeds";
 import AudioPlayer from "@/components/AudioPlayer";
 import VideoCarousel from "@/components/VideoCarousel";
+import NavigationMenu from "@/components/NavigationMenu";
 import { useLocation } from "wouter";
 
 export default function Home() {
@@ -22,7 +23,13 @@ export default function Home() {
   // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
   let { user, loading, error, isAuthenticated, logout } = useAuth();
 
-  const [showBoot, setShowBoot] = useState(true);
+  const [showBoot, setShowBoot] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const hasSeenBoot = sessionStorage.getItem('hasSeenBootAnimation');
+      return !hasSeenBoot;
+    }
+    return true;
+  });
   const [glitchActive, setGlitchActive] = useState(false);
   const [bootSequence, setBootSequence] = useState<string[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
@@ -68,7 +75,11 @@ export default function Home() {
   }, []);
 
   if (showBoot) {
-    return <BootAnimation onComplete={() => setShowBoot(false)} />;
+    const handleBootComplete = () => {
+      sessionStorage.setItem('hasSeenBootAnimation', 'true');
+      setShowBoot(false);
+    };
+    return <BootAnimation onComplete={handleBootComplete} />;
   }
 
   return (
@@ -92,6 +103,7 @@ export default function Home() {
               <Wifi className="w-3 h-3" /> NET_STATUS: ONLINE
             </span>
             <span className="animate-pulse text-accent">SYS_WARNING: UNSTABLE</span>
+            <NavigationMenu />
           </div>
         </div>
       </header>

@@ -115,3 +115,12 @@
 - [x] Integrate carousel into Home page hero section
 - [x] Write tests for carousel functionality
 - [x] Test carousel on different screen sizes
+
+
+## Boot Animation & Navigation Menu (Complete)
+- [x] Fix boot animation to only play on initial website entry
+- [x] Create hamburger navigation menu component
+- [x] Integrate navigation menu into layout
+- [x] Add mobile-responsive menu styling
+- [x] Write tests for navigation menu functionality
+- [x] Test navigation behavior and boot animation
