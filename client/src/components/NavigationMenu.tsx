@@ -155,27 +155,29 @@ export default function NavigationMenu() {
             const isFocused = focusedIndex === index;
 
             return (
-              <Link key={link.href} href={link.href}>
-                <a
-                  ref={(el) => {
+              <Link
+                key={link.href}
+                href={link.href}
+                ref={(el) => {
+                  if (el instanceof HTMLAnchorElement) {
                     linkRefs.current[index] = el;
-                  }}
-                  onClick={closeMenu}
-                  onFocus={() => isOpen && setFocusedIndex(index)}
-                  className={`block px-4 py-3 md:px-2 md:py-1 text-sm font-mono transition-colors border-b border-primary/20 md:border-0 last:border-b-0 md:last:border-0 whitespace-nowrap outline-none ${
-                    active
-                      ? "bg-primary text-black font-bold shadow-[0_0_10px_rgba(0,255,65,0.5)]"
-                      : "text-primary hover:bg-primary hover:text-black"
-                  } ${
-                    isFocused
-                      ? "ring-2 ring-accent ring-inset"
-                      : ""
-                  }`}
-                  tabIndex={isOpen && isFocused ? 0 : -1}
-                  aria-current={active ? "page" : undefined}
-                >
-                  {link.label}
-                </a>
+                  }
+                }}
+                onClick={closeMenu}
+                onFocus={() => isOpen && setFocusedIndex(index)}
+                className={`block px-4 py-3 md:px-2 md:py-1 text-sm font-mono transition-colors border-b border-primary/20 md:border-0 last:border-b-0 md:last:border-0 whitespace-nowrap outline-none ${
+                  active
+                    ? "bg-primary text-black font-bold shadow-[0_0_10px_rgba(0,255,65,0.5)]"
+                    : "text-primary hover:bg-primary hover:text-black"
+                } ${
+                  isFocused
+                    ? "ring-2 ring-accent ring-inset"
+                    : ""
+                }`}
+                tabIndex={isOpen && isFocused ? 0 : -1}
+                aria-current={active ? "page" : undefined}
+              >
+                {link.label}
               </Link>
             );
           })}
