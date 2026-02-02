@@ -124,3 +124,10 @@
 - [x] Add mobile-responsive menu styling
 - [x] Write tests for navigation menu functionality
 - [x] Test navigation behavior and boot animation
+
+
+## Active Route Highlighting (Complete)
+- [x] Update NavigationMenu to detect current route
+- [x] Add active link styling with cyberpunk theme
+- [x] Test active route highlighting on all pages
+- [x] Write tests for active route detection

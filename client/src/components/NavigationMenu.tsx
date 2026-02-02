@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 
 interface NavLink {
@@ -18,6 +18,7 @@ const navLinks: NavLink[] = [
 
 export default function NavigationMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [location] = useLocation();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -25,6 +26,13 @@ export default function NavigationMenu() {
 
   const closeMenu = () => {
     setIsOpen(false);
+  };
+
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return location === "/";
+    }
+    return location.startsWith(href);
   };
 
   return (
@@ -61,16 +69,23 @@ export default function NavigationMenu() {
         } md:relative md:mt-0 md:border-0 md:shadow-none md:bg-transparent md:opacity-100 md:visible md:pointer-events-auto md:flex md:gap-1`}
       >
         <div className="flex flex-col md:flex-row md:gap-1">
-          {navLinks.map((link) => (
-            <Link key={link.href} href={link.href}>
-              <a
-                onClick={closeMenu}
-                className="block px-4 py-3 md:px-2 md:py-1 text-sm font-mono text-primary hover:bg-primary hover:text-black transition-colors border-b border-primary/20 md:border-0 last:border-b-0 md:last:border-0 whitespace-nowrap"
-              >
-                {link.label}
-              </a>
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link key={link.href} href={link.href}>
+                <a
+                  onClick={closeMenu}
+                  className={`block px-4 py-3 md:px-2 md:py-1 text-sm font-mono transition-colors border-b border-primary/20 md:border-0 last:border-b-0 md:last:border-0 whitespace-nowrap ${
+                    active
+                      ? "bg-primary text-black font-bold shadow-[0_0_10px_rgba(0,255,65,0.5)]"
+                      : "text-primary hover:bg-primary hover:text-black"
+                  }`}
+                >
+                  {link.label}
+                </a>
+              </Link>
+            );
+          })}
         </div>
       </nav>
     </div>
