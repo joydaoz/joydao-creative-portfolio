@@ -82,3 +82,62 @@ export const blogPostTags = mysqlTable("blogPostTags", {
 
 export type BlogPostTag = typeof blogPostTags.$inferSelect;
 export type InsertBlogPostTag = typeof blogPostTags.$inferInsert;
+
+// Analytics: Page views and sessions
+export const pageViews = mysqlTable("pageViews", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 64 }).notNull(),
+  page: varchar("page", { length: 255 }).notNull(), // e.g., "/", "/blog", "/blog/post-slug"
+  referrer: varchar("referrer", { length: 255 }),
+  userAgent: text("userAgent"),
+  ipHash: varchar("ipHash", { length: 64 }), // hashed IP for privacy
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+export type PageView = typeof pageViews.$inferSelect;
+export type InsertPageView = typeof pageViews.$inferInsert;
+
+// Analytics: User interactions and events
+export const analyticsEvents = mysqlTable("analyticsEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 64 }).notNull(),
+  eventType: varchar("eventType", { length: 100 }).notNull(), // e.g., "click", "form_submit", "video_play", "audio_play"
+  eventName: varchar("eventName", { length: 255 }).notNull(), // e.g., "youtube_link_click", "blog_post_click"
+  page: varchar("page", { length: 255 }).notNull(),
+  metadata: text("metadata"), // JSON string for additional data
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+export type InsertAnalyticsEvent = typeof analyticsEvents.$inferInsert;
+
+// Analytics: Session tracking
+export const sessions = mysqlTable("sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 64 }).notNull().unique(),
+  startTime: timestamp("startTime").defaultNow().notNull(),
+  endTime: timestamp("endTime"),
+  duration: int("duration"), // duration in seconds
+  pageCount: int("pageCount").default(0).notNull(),
+  eventCount: int("eventCount").default(0).notNull(),
+  referrer: varchar("referrer", { length: 255 }),
+  userAgent: text("userAgent"),
+  ipHash: varchar("ipHash", { length: 64 }),
+});
+
+export type Session = typeof sessions.$inferSelect;
+export type InsertSession = typeof sessions.$inferInsert;
+
+// Analytics: Page engagement metrics
+export const pageEngagement = mysqlTable("pageEngagement", {
+  id: int("id").autoincrement().primaryKey(),
+  page: varchar("page", { length: 255 }).notNull().unique(),
+  totalViews: int("totalViews").default(0).notNull(),
+  uniqueVisitors: int("uniqueVisitors").default(0).notNull(),
+  avgTimeOnPage: int("avgTimeOnPage").default(0).notNull(), // in seconds
+  bounceRate: int("bounceRate").default(0).notNull(), // percentage 0-100
+  lastUpdated: timestamp("lastUpdated").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PageEngagement = typeof pageEngagement.$inferSelect;
+export type InsertPageEngagement = typeof pageEngagement.$inferInsert;
