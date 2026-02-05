@@ -10,9 +10,6 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Collaborators from "./pages/Collaborators";
 import PressKit from "./pages/PressKit";
-import AnalyticsDashboard from "./pages/AnalyticsDashboard";
-import { useEffect } from "react";
-import { initializeAnalytics, setupExternalLinkTracking } from "./lib/analytics";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -20,7 +17,6 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/admin"} component={AdminDashboard} />
-      <Route path={"/admin/analytics"} component={AnalyticsDashboard} />
       <Route path={"/blog"} component={Blog} />
       <Route path={"/blog/:slug"} component={BlogPost} />
       <Route path={"/collaborators"} component={Collaborators} />
@@ -38,12 +34,6 @@ function Router() {
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
-  useEffect(() => {
-    // Initialize analytics on app load
-    initializeAnalytics();
-    setupExternalLinkTracking();
-  }, []);
-
   return (
     <ErrorBoundary>
       <ThemeProvider
