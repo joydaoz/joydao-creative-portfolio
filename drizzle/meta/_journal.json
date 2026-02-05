@@ -22,6 +22,20 @@
       "when": 1765617826829,
       "tag": "0002_left_rafael_vega",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1770074489723,
+      "tag": "0003_organic_daimon_hellstrom",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1770282525056,
+      "tag": "0004_natural_vanisher",
+      "breakpoints": true
     }
   ]
 }
